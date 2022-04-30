@@ -1,36 +1,40 @@
 package com.bigtyno.websoket.Handler;
 
-// import 생략....
-
-import org.springframework.stereotype.Repository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.*;
+import java.util.List;
 
-@Repository
+@RequiredArgsConstructor
+@Service
 public class ChatRoomRepository {
-
-    private Map<String, ChatRoom> chatRoomMap;
+    // Redis
+    private static final String CHAT_ROOMS = "CHAT_ROOM";
+    private final RedisTemplate<String, Object> redisTemplate;
+    private HashOperations<String, String, ChatRoom> opsHashChatRoom;
 
     @PostConstruct
     private void init() {
-        chatRoomMap = new LinkedHashMap<>();
+        opsHashChatRoom = redisTemplate.opsForHash();
     }
 
+    // 모든 채팅방 조회
     public List<ChatRoom> findAllRoom() {
-        // 채팅방 생성순서 최근 순으로 반환
-        List chatRooms = new ArrayList<>(chatRoomMap.values());
-        Collections.reverse(chatRooms);
-        return chatRooms;
+        return opsHashChatRoom.values(CHAT_ROOMS);
     }
 
+    // 특정 채팅방 조회
     public ChatRoom findRoomById(String id) {
-        return chatRoomMap.get(id);
+        return opsHashChatRoom.get(CHAT_ROOMS, id);
     }
 
+    // 채팅방 생성 : 서버간 채팅방 공유를 위해 redis hash에 저장한다.
     public ChatRoom createChatRoom(String name) {
         ChatRoom chatRoom = ChatRoom.create(name);
-        chatRoomMap.put(chatRoom.getRoomId(), chatRoom);
+        opsHashChatRoom.put(CHAT_ROOMS, chatRoom.getRoomId(), chatRoom);
         return chatRoom;
     }
 }

@@ -6,4 +6,8 @@ spring:
       enabled: false
   freemarker:
     cache: false
-
+  jwt:
+    secret: govlepel@$&
+  redis:
+    host: 127.0.0.1
+    port: 6379
