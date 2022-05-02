@@ -14,6 +14,8 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 public class WebSockConfig implements WebSocketMessageBrokerConfigurer {
 
+    //메세지 브로커 설정.  /pub 으로 으로 들어오면 stompHandler 로 이동 시켜 메세지를 가공한다 .
+
     private final StompHandler stompHandler;
 
     @Override

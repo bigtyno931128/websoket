@@ -1,8 +1,6 @@
 package com.bigtyno.websoket.Handler;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.CrudRepository;
 
-
-
-public interface ChatRepository extends JpaRepository<Chat,Long> {
+public interface ChatRepository extends CrudRepository<Chat,Long> {
 }

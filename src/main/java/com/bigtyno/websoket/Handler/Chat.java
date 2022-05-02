@@ -23,9 +23,9 @@ public class Chat {
     private String message; // 메시지
 
 
-    public Chat(String message1, String user, String planId) {
+    public Chat(String message1, String nickname, String planId) {
         this.roomId = planId;
-        this.sender = user;
+        this.sender = nickname;
         this.message = message1;
     }
 }
