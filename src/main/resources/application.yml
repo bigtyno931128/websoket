@@ -6,4 +6,5 @@ spring:
       enabled: false
   freemarker:
     cache: false
-
+  jwt:
+    secret: govlepel@$&

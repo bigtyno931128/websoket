@@ -1,38 +1,31 @@
 package com.bigtyno.websoket.Handler;
 
-// import 생략...
-
-import com.bigtyno.websoket.Handler.ChatMessage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
+
+// import 생략...
 
 @RequiredArgsConstructor
 @Controller
 public class ChatController {
 
-    private final SimpMessageSendingOperations messagingTemplate;
-    private final ChatRepository chatRepository;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final ChatRoomRepository chatRoomRepository;
+    private final ChatService chatService;
 
-    @Transactional
+    /**
+     * websocket "/pub/chat/message"로 들어오는 메시징을 처리한다.
+     */
     @MessageMapping("/chat/message")
-    public void message(ChatMessage message) {
-        if (ChatMessage.MessageType.JOIN.equals(message.getType())){
-            message.setMessage(message.getSender() + "님이 입장하셨습니다.");
-        }
-        String message1 = message.getMessage();
-        String user = message.getSender();
-        String planId = message.getRoomId();
-        System.out.println("==============");
-        System.out.println(message1);
-        System.out.println(user);
-        System.out.println(planId);
-        Chat chat = new Chat(message1,user,planId);
-        chatRepository.save(chat);
-
-
-        messagingTemplate.convertAndSend("/sub/chat/room/" + message.getRoomId(), message);
+    public void message(ChatMessage message, @Header("token") String token) {
+        String nickname = jwtTokenProvider.getUserNameFromJwt(token);
+        // 로그인 회원 정보로 대화명 설정
+        message.setSender(nickname);
+        // 채팅방 인원수 세팅
+        message.setUserCount(chatRoomRepository.getUserCount(message.getRoomId()));
+        // Websocket에 발행된 메시지를 redis로 발행(publish)
+        chatService.sendChatMessage(message);
     }
 }
